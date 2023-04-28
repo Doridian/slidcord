@@ -1,0 +1,53 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 5ac5e6f
+_src_path: git+https://git.sr.ht/~nicoco/slidge-template
+author: nicoco
+author_email: nicoco@nicoco.fr
+author_website: https://nicoco.fr
+dockerhub_username: nicocool84
+legacy_lib: discord.py-self
+legacy_lib_website: https://discordpy-self.readthedocs.io
+legacy_service: Discord
+legacy_service_website: https://discord.com
+module_name: slidcord
+project_name: slidcord
+python_version: '3.9'
+srht_secret_c3p0: dc710d9d-8043-4e1d-9837-b35bfa02800a
+srht_secret_docker: 173244e1-c233-43de-969f-65965c5487e1
+srht_secret_pypi: 3ecea679-dec7-4ac0-8821-75d0f4fe0773
+srht_username: nicoco
+xeps:
+-   note: Text channels are bridged as MUCs. You have to join servers from official
+        discord clients. No group administration yet.
+    number: 45
+    status: partial
+-   note: Typing notifications.
+    number: 85
+    status: complete
+-   note: Not recipient-generated as in XMPP, but receipts are emitted when Discord
+        acknowledges a message.
+    number: 184
+    status: complete
+-   note: null
+    number: 201
+    status: complete
+-   number: 256
+    status: wontfix
+-   note: null
+    number: 308
+    status: complete
+-   note: null
+    number: 333
+    status: complete
+-   note: null
+    number: 363
+    status: complete
+-   note: null
+    number: 424
+    status: complete
+-   note: Custom emojis are not a thing in XMPP
+    number: 444
+    status: partial
+-   note: null
+    number: 461
+    status: complete
