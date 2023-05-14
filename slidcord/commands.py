@@ -30,7 +30,7 @@ class ListGuilds(Command):
                     ],
                 )
             ],
-            handler=self.list_guilds,
+            handler=self.list_guilds,  # type:ignore
             handler_args=(guilds,),
         )
 
