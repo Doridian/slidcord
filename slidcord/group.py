@@ -61,6 +61,8 @@ class MUC(LegacyMUC[int, int, Participant, int]):
 
     async def update_info(self):
         chan = await self.get_discord_channel()
+        if not chan:
+            raise XMPPError("item-not-found", f"Can't retrieve info discord on {self}")
 
         if chan.category:
             self.name = (
