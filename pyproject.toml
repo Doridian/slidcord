@@ -15,7 +15,7 @@ discord-py-self = "^2.0.0"
 
 [tool.poetry.dependencies.slidge]
 git = "https://git.sr.ht/~nicoco/slidge"
-branch = "split"
+branch = "master"
 
 [tool.poetry.group.dev.dependencies]
 pytest-asyncio = "^0.21.0"
