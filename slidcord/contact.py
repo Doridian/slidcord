@@ -4,6 +4,7 @@ import discord as di
 from slidge import LegacyContact, LegacyRoster
 from slixmpp.exceptions import XMPPError
 
+from . import config
 from .util import MessageMixin, StatusMixin
 
 if TYPE_CHECKING:
@@ -40,7 +41,7 @@ class Contact(StatusMixin, MessageMixin, LegacyContact[int]):  # type: ignore
         self.is_friend = u.is_friend()
 
         # massive rate limiting if trying to fetch profiles of non friends
-        if self.is_friend:
+        if config.AUTO_FETCH_FRIENDS_BIO and self.is_friend:
             await self.fetch_vcard()
 
         # TODO: use the relationship here
