@@ -14,6 +14,10 @@ if TYPE_CHECKING:
 class Contact(StatusMixin, MessageMixin, LegacyContact[int]):  # type: ignore
     session: "Session"
 
+    # not needed because discord.py-self throws separate presence events
+    # per guild
+    PROPAGATE_PRESENCE_TO_GROUPS = False
+
     @property
     def discord_user(self) -> di.User:  # type: ignore
         self.session.log.debug("Searching for user: %s", self.legacy_id)
