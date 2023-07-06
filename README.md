@@ -1,5 +1,11 @@
 # slidcord
 
+[Home](https://sr.ht/~nicoco/slidge) |
+[Docs](https://slidge.im/slidcord) |
+[Issues](https://todo.sr.ht/~nicoco/slidcord) |
+[Patches](https://lists.sr.ht/~nicoco/public-inbox) |
+[Chat](xmpp:slidge@conference.nicoco.fr?join)
+
 A
 [feature-rich](https://slidge.im/slidcord/features.html)
 [Discord](https://discord.com) to
