@@ -46,9 +46,9 @@ class MUC(LegacyMUC[int, int, Participant, int]):
         p.discord_id = self.session.discord.user.id  # type:ignore
         return p
 
-    async def fill_participants(self, max_=50):
+    async def fill_participants(self):
         chan = await self.get_discord_channel()
-        for m in chan.members[:max_]:
+        for m in chan.members:
             if m.id == self.session.discord.user.id:  # type:ignore
                 await self.get_user_participant()
                 continue
