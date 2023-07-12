@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from .group import MUC
 
 Recipient = Union["MUC", "Contact"]
+DiscordRecipient = Union[di.DMChannel, di.TextChannel, di.Thread]
 
 
 class Session(BaseSession[int, Recipient]):
@@ -43,6 +44,14 @@ class Session(BaseSession[int, Recipient]):
         self.discord.ignore_next_msg_event.add(mid)
         return mid
 
+    @staticmethod
+    def __get_ref(
+        reply_to_msg_id: int, recipient: DiscordRecipient
+    ) -> Optional[di.MessageReference]:
+        if reply_to_msg_id is None:
+            return None
+        return di.MessageReference(message_id=reply_to_msg_id, channel_id=recipient.id)
+
     async def send_text(
         self,
         chat: Recipient,
@@ -52,12 +61,7 @@ class Session(BaseSession[int, Recipient]):
         **kwargs,
     ):
         recipient = await get_recipient(chat, thread)
-        if reply_to_msg_id is None:
-            reference = None
-        else:
-            reference = di.MessageReference(
-                message_id=reply_to_msg_id, channel_id=recipient.id
-            )
+        reference = self.__get_ref(reply_to_msg_id, recipient)
 
         async with self.send_lock:
             msg = await recipient.send(text, reference=reference)  # type:ignore
@@ -158,9 +162,7 @@ class Session(BaseSession[int, Recipient]):
         pass
 
 
-async def get_recipient(
-    chat: Recipient, thread: Optional[int]
-) -> Union[di.DMChannel, di.TextChannel, di.Thread]:
+async def get_recipient(chat: Recipient, thread: Optional[int]) -> DiscordRecipient:
     if chat.is_group:
         chat = cast("MUC", chat)
         channel = await chat.get_discord_channel()
