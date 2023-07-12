@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional, Union
 
 import discord as di
+from slidge import LegacyParticipant
 from slidge.core.mixins.message import ContentMessageMixin
 from slidge.core.mixins.presence import PresenceMixin
 from slidge.util import strip_illegal_chars
@@ -131,7 +132,10 @@ class StatusMixin(PresenceMixin):
         if status == di.Status.online:
             self.online(msg)
         elif status == di.Status.offline:
-            self.offline(msg)
+            if isinstance(self, LegacyParticipant):
+                self.extended_away(msg)
+            else:
+                self.offline(msg)
         elif status == di.Status.idle:
             self.away(msg)
         elif status == di.Status.dnd:
