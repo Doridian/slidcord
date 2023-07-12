@@ -70,11 +70,15 @@ class Session(BaseSession[int, Recipient]):
     async def logout(self):
         await self.discord.close()
 
-    async def send_file(self, chat: Recipient, url: str, thread=None, **kwargs):
+    async def send_file(
+        self, chat: Recipient, url: str, thread=None, reply_to_msg_id=None, **kwargs
+    ):
         # discord clients inline previews of external URLs, so no need to actually send on discord servers
         recipient = await get_recipient(chat, thread)
+        reference = self.__get_ref(reply_to_msg_id, recipient)
+
         async with self.send_lock:
-            msg = await recipient.send(url)
+            msg = await recipient.send(url, reference=reference)  # type:ignore
         return self.__send(msg)
 
     async def active(self, c: Recipient, thread=None):
