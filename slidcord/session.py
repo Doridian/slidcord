@@ -1,6 +1,8 @@
 import asyncio
+import io
 from typing import TYPE_CHECKING, Optional, Union, cast
 
+import aiohttp
 import discord as di
 from slidge import BaseSession
 from slixmpp.exceptions import XMPPError
@@ -71,14 +73,25 @@ class Session(BaseSession[int, Recipient]):
         await self.discord.close()
 
     async def send_file(
-        self, chat: Recipient, url: str, thread=None, reply_to_msg_id=None, **kwargs
+        self,
+        chat: Recipient,
+        url: str,
+        *,
+        http_response: aiohttp.ClientResponse,
+        thread=None,
+        reply_to_msg_id=None,
+        **kwargs,
     ):
-        # discord clients inline previews of external URLs, so no need to actually send on discord servers
         recipient = await get_recipient(chat, thread)
         reference = self.__get_ref(reply_to_msg_id, recipient)
 
         async with self.send_lock:
-            msg = await recipient.send(url, reference=reference)  # type:ignore
+            msg = await recipient.send(
+                reference=reference,  # type:ignore
+                file=di.File(
+                    io.BytesIO(await http_response.read()), filename=url.split("/")[-1]
+                ),
+            )
         return self.__send(msg)
 
     async def active(self, c: Recipient, thread=None):
