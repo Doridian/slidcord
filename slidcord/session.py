@@ -38,6 +38,11 @@ class Session(BaseSession[int, Recipient]):
         self.bookmarks.user_nick = str(self.discord.user.display_name)
         return f"Logged on as {self.discord.user}"
 
+    def __send(self, msg: di.Message):
+        mid = msg.id
+        self.discord.ignore_next_msg_event.add(mid)
+        return mid
+
     async def send_text(
         self,
         chat: Recipient,
@@ -56,9 +61,7 @@ class Session(BaseSession[int, Recipient]):
 
         async with self.send_lock:
             msg = await recipient.send(text, reference=reference)  # type:ignore
-        mid = msg.id
-        self.discord.ignore_next_msg_event.add(mid)
-        return mid
+        return self.__send(msg)
 
     async def logout(self):
         await self.discord.close()
@@ -66,7 +69,9 @@ class Session(BaseSession[int, Recipient]):
     async def send_file(self, chat: Recipient, url: str, thread=None, **kwargs):
         # discord clients inline previews of external URLs, so no need to actually send on discord servers
         recipient = await get_recipient(chat, thread)
-        await recipient.send(url)
+        async with self.send_lock:
+            msg = await recipient.send(url)
+        return self.__send(msg)
 
     async def active(self, c: Recipient, thread=None):
         pass
