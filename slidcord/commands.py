@@ -54,13 +54,9 @@ class ListGuilds(Command):
         return TableResult(
             fields=[
                 FormField("name", "Name"),
-                FormField("n_participants", "Number of participants"),
                 FormField("jid", "JID", type="jid-single"),
             ],
             description=f"Text channels of server {guild}",
-            items=[
-                {"name": c.name, "n_participants": c.n_participants, "jid": c.jid}
-                for c in channels
-            ],
+            items=[{"name": c.name, "jid": c.jid} for c in channels],
             jids_are_mucs=True,
         )
