@@ -61,7 +61,10 @@ class MessageMixin(ContentMessageMixin):
             reply_to.body = "[quoted message could not be fetched]"
             return reply_to
 
-        reply_to.body = quoted_msg.clean_content
+        if (att := quoted_msg.attachments) and (url := att[0].url):
+            reply_to.body = att[0].filename + ": " + url
+        else:
+            reply_to.body = quoted_msg.clean_content
         author = quoted_msg.author
         if author == self.session.discord.user:
             reply_to.author = self.session.user
