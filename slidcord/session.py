@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional, Union, cast
 import aiohttp
 import discord as di
 from slidge import BaseSession
+from slidge.util.types import PseudoPresenceShow, ResourceDict
 from slixmpp.exceptions import XMPPError
 
 if TYPE_CHECKING:
@@ -177,6 +178,33 @@ class Session(BaseSession[int, Recipient]):
 
     async def search(self, form_values: dict[str, str]):
         pass
+
+    async def presence(
+        self,
+        resource: str,
+        show: PseudoPresenceShow,
+        status: str,
+        resources: dict[str, ResourceDict],
+        merged_resource: Optional[ResourceDict],
+    ):
+        self.log.debug("PRESENCE: %s", merged_resource)
+        if not merged_resource:
+            await self.discord.change_presence(status=di.Status.offline)
+        else:
+            await self.discord.change_presence(
+                activity=di.CustomActivity(
+                    merged_resource["status"] if merged_resource["status"] else None
+                ),
+                status=PRESENCE_SHOW_MAP[merged_resource["show"]],
+            )
+
+
+PRESENCE_SHOW_MAP = {
+    "away": di.Status.idle,
+    "xa": di.Status.idle,
+    "dnd": di.Status.dnd,
+    "": di.Status.online,
+}
 
 
 async def get_recipient(chat: Recipient, thread: Optional[int]) -> DiscordRecipient:
