@@ -883,14 +883,14 @@ sphinx-basic-ng = "*"
 
 [[package]]
 name = "identify"
-version = "2.5.26"
+version = "2.5.27"
 description = "File identification library for Python"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "identify-2.5.26-py2.py3-none-any.whl", hash = "sha256:c22a8ead0d4ca11f1edd6c9418c3220669b3b7533ada0a0ffa6cc0ef85cf9b54"},
-    {file = "identify-2.5.26.tar.gz", hash = "sha256:7243800bce2f58404ed41b7c002e53d4d22bcf3ae1b7900c2d7aefd95394bf7f"},
+    {file = "identify-2.5.27-py2.py3-none-any.whl", hash = "sha256:fdb527b2dfe24602809b2201e033c2a113d7bdf716db3ca8e3243f735dcecaba"},
+    {file = "identify-2.5.27.tar.gz", hash = "sha256:287b75b04a0e22d727bc9a41f0d4f3c1bcada97490fa6eabb5b28f0e9097e733"},
 ]
 
 [package.extras]
@@ -1906,7 +1906,7 @@ slixmpp = "^1.8.4"
 type = "git"
 url = "https://git.sr.ht/~nicoco/slidge"
 reference = "master"
-resolved_reference = "e980a647ac0645a0d5f550163cbb9bf2109164be"
+resolved_reference = "293613b0a34d083d6387d745b4284d83b4873d90"
 
 [[package]]
 name = "slidge-dev-helpers"
@@ -2183,14 +2183,14 @@ test = ["pytest"]
 
 [[package]]
 name = "sphinxcontrib-serializinghtml"
-version = "1.1.8"
+version = "1.1.9"
 description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)"
 category = "dev"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "sphinxcontrib_serializinghtml-1.1.8-py3-none-any.whl", hash = "sha256:27849e7227277333d3d32f17c138ee148a51fa01f888a41cd6d4e73bcabe2d06"},
-    {file = "sphinxcontrib_serializinghtml-1.1.8.tar.gz", hash = "sha256:aaf3026335146e688fd209b72320314b1b278320cf232e3cda198f873838511a"},
+    {file = "sphinxcontrib_serializinghtml-1.1.9-py3-none-any.whl", hash = "sha256:9b36e503703ff04f20e9675771df105e58aa029cfcbc23b8ed716019b7416ae1"},
+    {file = "sphinxcontrib_serializinghtml-1.1.9.tar.gz", hash = "sha256:0c64ff898339e1fac29abd2bf5f11078f3ec413cfe9c046d3120d7ca65530b54"},
 ]
 
 [package.dependencies]
