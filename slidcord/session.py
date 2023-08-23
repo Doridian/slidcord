@@ -1,6 +1,6 @@
 import asyncio
 import io
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, NamedTuple, Optional, Union, cast
 
 import aiohttp
 import discord as di
@@ -16,6 +16,11 @@ Recipient = Union["MUC", "Contact"]
 DiscordRecipient = Union[di.DMChannel, di.TextChannel, di.Thread]
 
 
+class DiscordPresence(NamedTuple):
+    status: Optional[di.Status]
+    activity: Optional[di.CustomActivity]
+
+
 class Session(BaseSession[int, Recipient]):
     contacts: "Roster"
 
@@ -25,6 +30,7 @@ class Session(BaseSession[int, Recipient]):
 
         self.discord = Discord(self)
         self.send_lock = asyncio.Lock()
+        self.__discord_presence: Optional[DiscordPresence] = None
 
     @staticmethod
     def xmpp_msg_id_to_legacy_msg_id(i: str):
@@ -187,16 +193,23 @@ class Session(BaseSession[int, Recipient]):
         resources: dict[str, ResourceDict],
         merged_resource: Optional[ResourceDict],
     ):
-        self.log.debug("PRESENCE: %s", merged_resource)
         if not merged_resource:
-            await self.discord.change_presence(status=di.Status.offline)
+            new = DiscordPresence(status=di.Status.offline, activity=None)
         else:
-            await self.discord.change_presence(
+            new = DiscordPresence(
+                status=PRESENCE_SHOW_MAP[merged_resource["show"]],
                 activity=di.CustomActivity(
                     merged_resource["status"] if merged_resource["status"] else None
                 ),
-                status=PRESENCE_SHOW_MAP[merged_resource["show"]],
             )
+        old = self.__discord_presence
+        if new == old:
+            self.log.debug("No presence change: %s vs %s", new, old)
+            return
+
+        self.log.debug("New presence: %s vs %s", new, old)
+        await self.discord.change_presence(activity=new.activity, status=new.status)
+        self.__discord_presence = new
 
 
 PRESENCE_SHOW_MAP = {
