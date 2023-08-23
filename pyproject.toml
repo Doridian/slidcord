@@ -12,6 +12,7 @@ url = "https://slidge.im/repo"
 [tool.poetry.dependencies]
 python = "^3.9"
 discord-py-self = "^2.0.0"
+emoji = "^2.8.0"
 
 [tool.poetry.dependencies.slidge]
 git = "https://git.sr.ht/~nicoco/slidge"
