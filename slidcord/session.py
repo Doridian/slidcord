@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, NamedTuple, Optional, Union, cast
 
 import aiohttp
 import discord as di
+from emoji import analyze
 from slidge import BaseSession
 from slidge.util.types import PseudoPresenceShow, ResourceDict
 from slixmpp.exceptions import XMPPError
@@ -193,15 +194,22 @@ class Session(BaseSession[int, Recipient]):
         resources: dict[str, ResourceDict],
         merged_resource: Optional[ResourceDict],
     ):
-        if not merged_resource:
-            new = DiscordPresence(status=di.Status.offline, activity=None)
-        else:
+        if merged_resource:
+            merged_status = merged_resource["status"]
+            try:
+                token = next(analyze(merged_status, False, True))
+            except StopIteration:
+                emoji = None
+            else:
+                emoji = di.PartialEmoji(name=token.chars)
             new = DiscordPresence(
                 status=PRESENCE_SHOW_MAP[merged_resource["show"]],
-                activity=di.CustomActivity(
-                    merged_resource["status"] if merged_resource["status"] else None
-                ),
+                activity=di.CustomActivity(name=merged_status, emoji=emoji)
+                if merged_status
+                else None,
             )
+        else:
+            new = DiscordPresence(status=di.Status.offline, activity=None)
         old = self.__discord_presence
         if new == old:
             self.log.debug("No presence change: %s vs %s", new, old)
