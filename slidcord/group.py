@@ -35,7 +35,7 @@ class Participant(StatusMixin, MessageMixin, LegacyParticipant):
 
 class MUC(LegacyMUC[int, int, Participant, int]):
     session: Session
-    type = MucType.GROUP
+    type = MucType.CHANNEL_NON_ANONYMOUS
 
     async def get_discord_channel(self) -> di.TextChannel:
         await self.session.discord.wait_until_ready()
