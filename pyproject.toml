@@ -5,10 +5,6 @@ description = ""
 authors = ["nicoco <nicoco@nicoco.fr>"]
 readme = "README.md"
 
-[[tool.poetry.source]]
-name = "slidge-repo"
-url = "https://slidge.im/repo"
-
 [tool.poetry.dependencies]
 python = "^3.9"
 discord-py-self = "^2.0.0"
