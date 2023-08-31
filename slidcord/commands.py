@@ -43,14 +43,15 @@ class ListGuilds(Command):
             guild = guilds[int(guild_id)]
         except (ValueError, IndexError, KeyError):
             raise XMPPError("bad-request")
-        channels = sorted(
-            [
-                await session.bookmarks.by_legacy_id(c.id)
-                for c in guild.channels
-                if isinstance(c, di.TextChannel)
-            ],
-            key=lambda c: c.name,
-        )
+        channels = []
+        for c in guild.channels:
+            if not isinstance(c, di.TextChannel):
+                continue
+            try:
+                channels.append(await session.bookmarks.by_legacy_id(c.id))
+            except XMPPError:
+                continue
+        channels.sort(key=lambda ch: ch.name)
         return TableResult(
             fields=[
                 FormField("name", "Name"),

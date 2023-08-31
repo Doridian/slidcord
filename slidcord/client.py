@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import discord as di
 from aiohttp import BasicAuth
+from slixmpp.exceptions import XMPPError
 
 if TYPE_CHECKING:
     from .contact import Contact
@@ -149,7 +150,10 @@ class Discord(di.Client):
         for channel in guild.channels:
             if not isinstance(channel, di.TextChannel):
                 continue
-            muc = await self.session.bookmarks.by_legacy_id(channel.id)
+            try:
+                muc = await self.session.bookmarks.by_legacy_id(channel.id)
+            except XMPPError:
+                continue
             participant = await muc.get_participant_by_legacy_id(member.id)
             participant.update_status(member.status, member.activity)
 

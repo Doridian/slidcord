@@ -18,7 +18,10 @@ class Bookmarks(LegacyBookmarks[int, "MUC"]):
     async def fill(self):
         for channel in self.session.discord.get_all_channels():
             if isinstance(channel, di.TextChannel):
-                await self.by_legacy_id(channel.id)
+                try:
+                    await self.by_legacy_id(channel.id)
+                except XMPPError as e:
+                    self.log.debug("Skipping %s because of %s", channel, e)
 
 
 class Participant(StatusMixin, MessageMixin, LegacyParticipant):
@@ -59,10 +62,23 @@ class MUC(LegacyMUC[int, int, Participant, int]):
                 p.affiliation = "owner"
             p.update_status(m.status, m.activity)
 
+    async def user_member(self):
+        try:
+            me = next(
+                m
+                for m in (await self.get_discord_channel()).members
+                if m.id == self.session.discord.user.id  # type:ignore
+            )
+        except StopIteration:
+            return None
+        return me
+
     async def update_info(self):
         chan = await self.get_discord_channel()
         if not chan:
-            raise XMPPError("item-not-found", f"Can't retrieve info discord on {self}")
+            raise XMPPError(
+                "item-not-found", f"Can't retrieve info discord on {self.legacy_id}"
+            )
 
         if chan.category:
             self.name = (
@@ -70,6 +86,18 @@ class MUC(LegacyMUC[int, int, Participant, int]):
             )
         else:
             self.name = f"{chan.guild.name}/{chan.position:02d}/{chan.name}"
+
+        me = await self.user_member()
+        if not me:
+            raise XMPPError(
+                "registration-required", f"You are not a member of {self.name}"
+            )
+
+        if not chan.permissions_for(me).read_messages:
+            raise XMPPError(
+                "forbidden", f"You are not allowed to read messages in {self.name}"
+            )
+
         self.subject = chan.topic
 
         self.n_participants = chan.guild.approximate_member_count
