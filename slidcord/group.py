@@ -143,7 +143,7 @@ class MUC(LegacyMUC[int, int, Participant, int]):
             p.DISCO_CATEGORY = "bot"
             return p
         elif user.system:
-            return await self.get_system_participant()
+            return self.get_system_participant()
         try:
             return await self.get_participant_by_legacy_id(user.id)
         except XMPPError as e:
