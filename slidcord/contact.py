@@ -8,11 +8,13 @@ from . import config
 from .util import MessageMixin, StatusMixin
 
 if TYPE_CHECKING:
+    from .group import Participant
     from .session import Session
 
 
 class Contact(StatusMixin, MessageMixin, LegacyContact[int]):  # type: ignore
     session: "Session"
+    participants: set["Participant"]  # type:ignore
 
     # not needed because discord.py-self throws separate presence events
     # per guild

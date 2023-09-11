@@ -23,6 +23,18 @@ class Bookmarks(LegacyBookmarks[int, "MUC"]):
                 except XMPPError as e:
                     self.log.debug("Skipping %s because of %s", channel, e)
 
+        for private_channel in self.session.discord.private_channels:
+            self.log.debug("Private channel: %s", private_channel)
+            if isinstance(private_channel, di.DMChannel):
+                continue
+            try:
+                muc = await self.by_legacy_id(private_channel.id)
+            except XMPPError as e:
+                self.log.debug("Skipping %s because of %s", private_channel, e)
+                continue
+
+            await muc.add_to_bookmarks()
+
 
 class Participant(StatusMixin, MessageMixin, LegacyParticipant):
     session: Session
@@ -38,11 +50,15 @@ class Participant(StatusMixin, MessageMixin, LegacyParticipant):
 
 class MUC(LegacyMUC[int, int, Participant, int]):
     session: Session
-    type = MucType.CHANNEL_NON_ANONYMOUS
 
-    async def get_discord_channel(self) -> di.TextChannel:
+    async def get_discord_channel(self) -> Union[di.TextChannel, di.GroupChannel]:
         await self.session.discord.wait_until_ready()
-        return self.session.discord.get_channel(self.legacy_id)  # type: ignore
+        channel = self.session.discord.get_channel(self.legacy_id)  # type: ignore
+        if not isinstance(channel, (di.GroupChannel, di.TextChannel)):
+            raise XMPPError(
+                "bad-request", f"This is not a valid textual discord channel: {channel}"
+            )
+        return channel
 
     async def get_user_participant(self):
         p = await super().get_user_participant()
@@ -51,22 +67,31 @@ class MUC(LegacyMUC[int, int, Participant, int]):
 
     async def fill_participants(self):
         chan = await self.get_discord_channel()
-        for m in chan.members:
+        for m in await self.members():
             if m.id == self.session.discord.user.id:  # type:ignore
                 await self.get_user_participant()
                 continue
             co = await self.session.contacts.by_discord_user(m)
             p = await self.get_participant_by_contact(co)
-            if chan.guild.owner == m:
-                p.role = "moderator"
-                p.affiliation = "owner"
-            p.update_status(m.status, m.activity)
+            if isinstance(chan, di.TextChannel):
+                if chan.guild.owner == m:
+                    p.role = "moderator"
+                    p.affiliation = "owner"
+            if isinstance(m, di.Member):
+                p.update_status(m.status, m.activity)
+
+    async def members(self):
+        chan = await self.get_discord_channel()
+        if isinstance(chan, di.GroupChannel):
+            return chan.nicks  # type: ignore
+        else:
+            return chan.members  # type: ignore
 
     async def user_member(self):
         try:
             me = next(
                 m
-                for m in (await self.get_discord_channel()).members
+                for m in await self.members()
                 if m.id == self.session.discord.user.id  # type:ignore
             )
         except StopIteration:
@@ -79,14 +104,14 @@ class MUC(LegacyMUC[int, int, Participant, int]):
             raise XMPPError(
                 "item-not-found", f"Can't retrieve info discord on {self.legacy_id}"
             )
-
-        if chan.category:
-            self.name = (
-                f"{chan.guild.name}/{chan.position:02d}/{chan.category}/{chan.name}"
-            )
+        if isinstance(chan, di.GroupChannel):
+            self.type = MucType.GROUP
+            await self._update_group(chan)
         else:
-            self.name = f"{chan.guild.name}/{chan.position:02d}/{chan.name}"
+            self.type = MucType.CHANNEL_NON_ANONYMOUS
+            await self._update_guild_channel(chan)
 
+    async def _update_guild_channel(self, chan: di.TextChannel):
         me = await self.user_member()
         if not me:
             raise XMPPError(
@@ -98,11 +123,32 @@ class MUC(LegacyMUC[int, int, Participant, int]):
                 "forbidden", f"You are not allowed to read messages in {self.name}"
             )
 
+        if chan.category:
+            self.name = (
+                f"{chan.guild.name}/{chan.position:02d}/{chan.category}/{chan.name}"
+            )
+        else:
+            self.name = f"{chan.guild.name}/{chan.position:02d}/{chan.name}"
         self.subject = chan.topic
-
         self.n_participants = chan.guild.approximate_member_count
         if icon := chan.guild.icon:
             self.avatar = str(icon)
+
+    async def _update_group(self, chan: di.GroupChannel):
+        if chan.name:
+            self.name = chan.name
+        else:
+            recipients = [
+                x
+                for x in chan.recipients
+                if x.id != self.session.discord.user.id  # type:ignore
+            ]
+
+            if len(recipients) == 0:
+                self.name = "Unnamed private group"
+            else:
+                self.name = ", ".join(map(lambda x: x.name, recipients))
+        self.n_participants = len(chan.nicks)
 
     async def backfill(self, oldest_id=None, oldest_date=None):
         try:
@@ -159,6 +205,8 @@ class MUC(LegacyMUC[int, int, Participant, int]):
 
     async def create_thread(self, xmpp_id: str) -> int:
         ch = await self.get_discord_channel()
+        if isinstance(ch, di.GroupChannel):
+            raise XMPPError("bad-request")
 
         try:
             thread_id = int(xmpp_id)

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import discord as di
 from aiohttp import BasicAuth
+from slidge import MucType
 from slixmpp.exceptions import XMPPError
 
 if TYPE_CHECKING:
@@ -106,7 +107,7 @@ class Discord(di.Client):
                 contact = await self.get_contact(user)
                 await contact.update_reactions(message)
 
-        elif isinstance(channel, di.TextChannel):
+        elif isinstance(channel, (di.TextChannel, di.GroupChannel)):
             muc = await self.session.bookmarks.by_legacy_id(channel.id)
 
             if user.id == self.user.id:  # type:ignore
@@ -143,6 +144,9 @@ class Discord(di.Client):
             return
         c = await self.session.contacts.by_discord_user(friend.user)
         c.update_status(friend.status, friend.activity)
+        for p in c.participants:
+            if p.muc.type == MucType.GROUP:
+                p.update_status(friend.status, friend.activity)
 
     async def on_guild_presence_update(self, member: di.Member):
         guild = member.guild
@@ -182,7 +186,7 @@ class Discord(di.Client):
             else:
                 return await self.get_contact(author)
 
-        if isinstance(channel, di.TextChannel):
+        if isinstance(channel, (di.TextChannel, di.GroupChannel)):
             muc = await self.session.bookmarks.by_legacy_id(channel.id)
             return await muc.get_participant_by_discord_user(author)
 

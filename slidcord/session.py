@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from .group import MUC
 
 Recipient = Union["MUC", "Contact"]
-DiscordRecipient = Union[di.DMChannel, di.TextChannel, di.Thread]
+DiscordRecipient = Union[di.DMChannel, di.TextChannel, di.Thread, di.GroupChannel]
 
 
 class DiscordPresence(NamedTuple):
@@ -165,7 +165,7 @@ class Session(BaseSession[int, Recipient]):
     async def update_reactions(self, message: di.Message):
         if isinstance(message.channel, di.DMChannel):
             me = await self.contacts.by_discord_user(message.channel.recipient)
-        elif isinstance(message.channel, di.TextChannel):
+        elif isinstance(message.channel, (di.TextChannel, di.GroupChannel)):
             muc = await self.bookmarks.by_legacy_id(message.channel.id)
             me = await muc.get_user_participant()
         else:
@@ -232,7 +232,7 @@ async def get_recipient(chat: Recipient, thread: Optional[int]) -> DiscordRecipi
     if chat.is_group:
         chat = cast("MUC", chat)
         channel = await chat.get_discord_channel()
-        if thread:
+        if thread and isinstance(chat, di.TextChannel):
             discord_thread = channel.get_thread(thread)
             if discord_thread is not None:
                 return discord_thread
