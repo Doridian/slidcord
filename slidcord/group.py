@@ -67,18 +67,29 @@ class MUC(LegacyMUC[int, int, Participant, int]):
 
     async def fill_participants(self):
         chan = await self.get_discord_channel()
+        owner = chan.guild.owner if isinstance(chan, di.TextChannel) else chan.owner
         for m in await self.members():
-            if m.id == self.session.discord.user.id:  # type:ignore
-                await self.get_user_participant()
-                continue
-            co = await self.session.contacts.by_discord_user(m)
-            p = await self.get_participant_by_contact(co)
-            if isinstance(chan, di.TextChannel):
-                if chan.guild.owner == m:
-                    p.role = "moderator"
-                    p.affiliation = "owner"
+            p = await self.get_participant_by_legacy_id(m.id)
+
             if isinstance(m, di.Member):
                 p.update_status(m.status, m.activity)
+
+            if owner == m:
+                p.role = "moderator"
+                p.affiliation = "owner"
+                continue
+
+            permissions = chan.permissions_for(m)
+            if (
+                permissions.kick_members
+                or permissions.ban_members
+                or permissions.manage_messages
+            ):
+                p.role = "moderator"
+                p.affiliation = "admin"
+            elif not permissions.send_messages:
+                p.role = "visitor"
+                # affiliation="member" is the default
 
     async def members(self):
         chan = await self.get_discord_channel()
