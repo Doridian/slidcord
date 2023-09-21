@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional, Union
 
 import discord as di
+import emoji
 from slidge import LegacyParticipant
 from slidge.core.mixins.message import ContentMessageMixin
 from slidge.core.mixins.presence import PresenceMixin
@@ -24,13 +25,18 @@ class MessageMixin(ContentMessageMixin):
         legacy_reactions = []
         user = self.discord_user
         for r in m.reactions:
-            if r.is_custom_emoji():
-                continue
-            assert isinstance(r.emoji, str)
             try:
                 async for u in r.users():
                     if u.id == user.id:
-                        legacy_reactions.append(r.emoji)
+                        if (
+                            r.is_custom_emoji()
+                            or not isinstance(r.emoji, str)
+                            or not emoji.is_emoji(r.emoji)
+                        ):
+                            legacy_reactions.append("❓")
+                        else:
+                            assert isinstance(r.emoji, str)
+                            legacy_reactions.append(r.emoji)
             except di.NotFound:
                 # the message has now been deleted
                 # seems to happen quite a lot. I guess
