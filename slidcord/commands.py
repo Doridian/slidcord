@@ -1,6 +1,6 @@
 import discord as di
 from slidge import FormField
-from slidge.core.command import Command, CommandAccess, Form, TableResult
+from slidge.command import Command, CommandAccess, Form, TableResult
 from slixmpp import JID
 from slixmpp.exceptions import XMPPError
 
