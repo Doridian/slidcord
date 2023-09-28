@@ -36,12 +36,16 @@ docker run docker.io/nicocool84/slidcord
 With [pipx](https://pypa.github.io/pipx/):
 
 ```sh
-pipx install slidcord  # for the latest tagged release
+
+# for the latest stable release (if any)
+pipx install slidcord
+
+# for the bleeding edge
+pipx install slidcord \
+    --pip-args='--extra-index-url https://slidge.im/repo'
+
 slidcord --help
 ```
-
-For the bleeding edge, download artifacts of
-[this build job](https://builds.sr.ht/~nicoco/slidcord/commits/master/ci.yml).
 
 ## Dev
 
