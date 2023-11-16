@@ -1,7 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import discord as di
-from aiohttp import BasicAuth
 from slidge import MucType
 from slixmpp.exceptions import XMPPError
 
@@ -24,28 +23,20 @@ MessageableChannel = Union[
 Author = Union[di.User, di.Member, di.ClientUser]
 
 
-class CaptchaHandler(di.CaptchaHandler):
-    def __init__(self, session: "Session"):
-        self.session = session
-
-    async def fetch_token(
-        self,
-        data: Dict[str, Any],
-        proxy: Optional[str],
-        proxy_auth: Optional[BasicAuth],
-        /,
-    ) -> str:
-        return await self.session.input(
-            "You need to complete a captcha to be able to continue using "
-            f"discord. Maybe you'll find some useful info here: {data}. If you "
-            "do, you can reply here with the captcha token."
-        )
+async def captcha_handler(
+    captcha_required: di.CaptchaRequired, client: "Discord"
+) -> str:
+    return await client.session.input(
+        "You need to complete a captcha to be able to continue using "
+        f"discord. Maybe you'll find some useful info here: {captcha_required}."
+        f"If you do, you can reply here with the captcha token."
+    )
 
 
 class Discord(di.Client):
     def __init__(self, session: "Session"):
         self.session = session
-        super().__init__(captcha_handler=CaptchaHandler(session))
+        super().__init__(captcha_handler=captcha_handler)
         self.log = session.log
         self.ignore_next_msg_event = set[int]()
 

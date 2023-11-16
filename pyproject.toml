@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-discord-py-self = "^2.0.0"
+discord-py-self = { git = "https://github.com/dolfies/discord.py-self" }
 emoji = "^2.8.0"
 
 [tool.poetry.dependencies.slidge]
