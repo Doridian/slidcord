@@ -34,7 +34,7 @@ class Session(BaseSession[int, Recipient]):
         self.__discord_presence: Optional[DiscordPresence] = None
 
     @staticmethod
-    def xmpp_msg_id_to_legacy_msg_id(i: str):
+    def xmpp_to_legacy_msg_id(i: str):
         return int(i)
 
     async def login(self):
