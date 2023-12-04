@@ -164,8 +164,8 @@ class MUC(LegacyMUC[int, int, Participant, int]):
     async def backfill(self, oldest_id=None, oldest_date=None):
         try:
             await self.history(oldest_date)
-        except discord.errors.Forbidden:
-            self.log.warning("Could not fetch history of %r", self.name)
+        except discord.errors.HTTPException as e:
+            self.log.warning("Could not fetch history of %r: %r", self.name, e)
 
     async def history(self, oldest: Optional[datetime] = None):
         if not config.MUC_BACK_FILL:
