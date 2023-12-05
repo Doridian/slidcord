@@ -219,6 +219,18 @@ class Session(BaseSession[int, Recipient]):
         await self.discord.change_presence(activity=new.activity, status=new.status)
         self.__discord_presence = new
 
+    async def on_avatar(
+        self,
+        bytes_: Optional[bytes],
+        hash_: Optional[str],
+        type_: Optional[str],
+        width: Optional[int],
+        height: Optional[int],
+    ) -> None:
+        if self.discord.user is None:
+            return
+        await self.discord.user.edit(avatar=bytes_)
+
 
 PRESENCE_SHOW_MAP = {
     "away": di.Status.idle,
