@@ -6,7 +6,8 @@ import aiohttp
 import discord as di
 from emoji import analyze
 from slidge import BaseSession
-from slidge.util.types import PseudoPresenceShow, ResourceDict
+from slidge.util.types import Mention, PseudoPresenceShow, ResourceDict
+from slidge.util.util import replace_mentions
 from slixmpp.exceptions import XMPPError
 
 if TYPE_CHECKING:
@@ -68,13 +69,17 @@ class Session(BaseSession[int, Recipient]):
         text: str,
         reply_to_msg_id=None,
         thread=None,
+        mentions: Optional[list[Mention]] = None,
         **kwargs,
     ):
         recipient = await get_recipient(chat, thread)
         reference = self.__get_ref(reply_to_msg_id, recipient)
 
         async with self.send_lock:
-            msg = await recipient.send(text, reference=reference)  # type:ignore
+            msg = await recipient.send(
+                replace_mentions(text, mentions, contact_to_mention),  # type:ignore
+                reference=reference,  # type:ignore
+            )
         return self.__send(msg)
 
     async def logout(self):
@@ -131,13 +136,16 @@ class Session(BaseSession[int, Recipient]):
         text: str,
         legacy_msg_id: int,
         *,
+        mentions: Optional[list[Mention]] = None,
         thread=None,
         **kwargs,
     ):
         channel = await get_recipient(chat, thread)
         self.discord.ignore_next_msg_event.add(legacy_msg_id)
         m = await channel.fetch_message(legacy_msg_id)
-        await m.edit(content=text)
+        await m.edit(
+            content=replace_mentions(text, mentions, contact_to_mention)  # type:ignore
+        )
 
     async def on_react(
         self, c: Recipient, legacy_msg_id: int, emojis: list[str], thread=None
@@ -256,3 +264,7 @@ async def get_recipient(chat: Recipient, thread: Optional[int]) -> DiscordRecipi
                 "recipient-unavailable", "Could not find the associated DM channel"
             )
         return dm
+
+
+def contact_to_mention(c: "Contact") -> str:
+    return f"<@{c.legacy_id}>"
