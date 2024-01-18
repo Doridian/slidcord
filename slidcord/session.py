@@ -62,7 +62,7 @@ class Session(BaseSession[int, Recipient]):
             return None
         return di.MessageReference(message_id=reply_to_msg_id, channel_id=recipient.id)
 
-    async def send_text(
+    async def on_text(
         self,
         chat: Recipient,
         text: str,
@@ -80,7 +80,7 @@ class Session(BaseSession[int, Recipient]):
     async def logout(self):
         await self.discord.close()
 
-    async def send_file(
+    async def on_file(
         self,
         chat: Recipient,
         url: str,
@@ -102,21 +102,12 @@ class Session(BaseSession[int, Recipient]):
             )
         return self.__send(msg)
 
-    async def active(self, c: Recipient, thread=None):
-        pass
-
-    async def inactive(self, c: Recipient, thread=None):
-        pass
-
-    async def composing(self, c: Recipient, thread=None):
+    async def on_composing(self, c: Recipient, thread=None):
         recipient = await get_recipient(c, thread)
         async with recipient.typing():
             await asyncio.sleep(5)
 
-    async def paused(self, c: Recipient, thread=None):
-        pass
-
-    async def displayed(self, c: Recipient, legacy_msg_id: int, thread=None):
+    async def on_displayed(self, c: Recipient, legacy_msg_id: int, thread=None):
         if not isinstance(legacy_msg_id, int):
             self.log.debug("This is not a valid discord msg id: %s", legacy_msg_id)
             return
@@ -134,13 +125,21 @@ class Session(BaseSession[int, Recipient]):
                 "Message %s should have been marked as read but this raised %s", m, e
             )
 
-    async def correct(self, c: Recipient, text: str, legacy_msg_id: int, thread=None):
-        channel = await get_recipient(c, thread)
+    async def on_correct(
+        self,
+        chat: Recipient,
+        text: str,
+        legacy_msg_id: int,
+        *,
+        thread=None,
+        **kwargs,
+    ):
+        channel = await get_recipient(chat, thread)
         self.discord.ignore_next_msg_event.add(legacy_msg_id)
         m = await channel.fetch_message(legacy_msg_id)
         await m.edit(content=text)
 
-    async def react(
+    async def on_react(
         self, c: Recipient, legacy_msg_id: int, emojis: list[str], thread=None
     ):
         channel = await get_recipient(c, thread)
@@ -156,7 +155,7 @@ class Session(BaseSession[int, Recipient]):
         for e in legacy_reactions - xmpp_reactions:
             await m.remove_reaction(e, self.discord.user)  # type:ignore
 
-    async def retract(self, c: Recipient, legacy_msg_id: int, thread=None):
+    async def on_retract(self, c: Recipient, legacy_msg_id: int, thread=None):
         channel = await get_recipient(c, thread)
         self.discord.ignore_next_msg_event.add(legacy_msg_id)
         m = await channel.fetch_message(legacy_msg_id)
@@ -183,10 +182,10 @@ class Session(BaseSession[int, Recipient]):
 
         return reactions
 
-    async def search(self, form_values: dict[str, str]):
+    async def on_search(self, form_values: dict[str, str]):
         pass
 
-    async def presence(
+    async def on_presence(
         self,
         resource: str,
         show: PseudoPresenceShow,
