@@ -78,8 +78,12 @@ class Discord(di.Client):
         if self.__ignore(m.id):
             return
 
-        if deleter := await self.get_sender_by_message(m):
-            deleter.retract(m.id, carbon=carbon)
+        if isinstance(m.channel, di.DMChannel):
+            author = await self.get_sender_by_message(m)
+            author.retract(m.id, carbon=carbon)
+        elif isinstance(m.channel, (di.TextChannel, di.GroupChannel)):
+            muc = await self.session.bookmarks.by_legacy_id(m.channel.id)
+            muc.get_system_participant().moderate(m.id)
 
     async def on_reaction_add(self, reaction: di.Reaction, user: Author):
         await self.update_reactions(reaction, user)
