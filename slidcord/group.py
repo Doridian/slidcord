@@ -4,6 +4,7 @@ from typing import Optional, Union
 import discord as di
 import discord.errors
 from slidge import LegacyBookmarks, LegacyMUC, LegacyParticipant, MucType
+from slidge.util.types import Hat
 from slixmpp.exceptions import XMPPError
 
 from . import config
@@ -73,6 +74,13 @@ class MUC(LegacyMUC[int, int, Participant, int]):
 
             if isinstance(m, di.Member):
                 p.update_status(m.status, m.activity)
+
+            p.set_hats(
+                [
+                    Hat(f"urn:slidcord:discord-role:{role.id}", role.name)
+                    for role in m.roles[1:]  # first role is @everyone, useless
+                ]
+            )
 
             if owner == m:
                 p.role = "moderator"
