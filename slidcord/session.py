@@ -223,7 +223,10 @@ class Session(BaseSession[int, Recipient]):
             return
 
         self.log.debug("New presence: %s vs %s", new, old)
-        await self.discord.change_presence(activity=new.activity, status=new.status)
+        await self.discord.change_presence(
+            activity=new.activity,
+            status=new.status or di.utils.MISSING,
+        )
         self.__discord_presence = new
 
     async def on_avatar(
