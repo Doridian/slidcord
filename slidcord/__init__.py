@@ -42,9 +42,7 @@ class Gateway(BaseGateway):
     COMPONENT_TYPE = "discord"
     COMPONENT_AVATAR = "https://www.usff.fr/wp-content/uploads/2018/05/Discord_logo.png"
 
-    REGISTRATION_INSTRUCTIONS = (
-        "Have a look at https://discordpy-self.readthedocs.io/en/latest/token.html"
-    )
+    REGISTRATION_INSTRUCTIONS = "Have a look at https://discordpy-self.readthedocs.io/en/latest/authenticating.html"
     REGISTRATION_FIELDS = [FormField("token", label="Discord token", required=True)]
 
     ROSTER_GROUP = "Discord"
