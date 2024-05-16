@@ -1,6 +1,7 @@
 import discord as di
 from slidge import FormField
 from slidge.command import Command, CommandAccess, Form, TableResult
+from slidge.command.categories import GROUPS
 from slixmpp import JID
 from slixmpp.exceptions import XMPPError
 
@@ -12,6 +13,7 @@ class ListGuilds(Command):
     HELP = "List your discord servers and their channels"
     CHAT_COMMAND = NODE = "servers"
     ACCESS = CommandAccess.USER_LOGGED
+    CATEGORY = GROUPS
 
     async def run(self, session, ifrom: JID, *args):
         assert isinstance(session, Session)
