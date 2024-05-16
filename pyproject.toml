@@ -10,6 +10,7 @@ python = "^3.9"
 discord-py-self = { git = "https://github.com/dolfies/discord.py-self", branch = "master" }
 emoji = "^2.8.0"
 slidge = "0.1.2"
+protobuf = "^4.24.3"  # v5 breaks discord.py-self
 
 [tool.poetry.group.dev.dependencies]
 pytest-asyncio = "^0.21.0"
