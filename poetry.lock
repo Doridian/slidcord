@@ -727,7 +727,7 @@ protobuf = "*"
 
 [[package]]
 name = "discord.py-self"
-version = "2.1.0a4845+g51d43a15"
+version = "2.1.0a4847+gb813c625"
 description = "A Python wrapper for the Discord user API"
 optional = false
 python-versions = ">=3.8.0"
@@ -1988,7 +1988,7 @@ utidylib = "*"
 type = "git"
 url = "https://git.sr.ht/~nicoco/slidge-dev-helpers"
 reference = "master"
-resolved_reference = "85ee4141062997317c90dda7bf0b6371a49d2d1e"
+resolved_reference = "4e69f5f47b65e2b3f3cf2ce1671c8f04b9169b50"
 
 [[package]]
 name = "slixmpp"
