@@ -164,6 +164,7 @@ class StatusMixin(PresenceMixin):
                 text += f" - {name}"
             if game := activity.game:
                 text += f" - {game}"
+            return strip_illegal_chars(text)
         elif isinstance(activity, di.Spotify):
             return strip_illegal_chars(
                 f"Listening to {activity.title} by {activity.artist} "
