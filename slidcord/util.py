@@ -137,7 +137,7 @@ class StatusMixin(PresenceMixin):
     ):
         # TODO: implement timeouts for activities (the Activity object has timestamps
         #       attached to it)
-        msg = strip_illegal_chars(str(activity)) if activity else None
+        msg = self.activity_to_text(activity)
         if status == di.Status.online:
             self.online(msg)
         elif status == di.Status.offline:
@@ -149,6 +149,49 @@ class StatusMixin(PresenceMixin):
             self.away(msg)
         elif status == di.Status.dnd:
             self.busy(msg)
+
+    @staticmethod
+    def activity_to_text(
+        activity: Optional[
+            Union[di.Activity, di.Game, di.CustomActivity, di.Streaming, di.Spotify]
+        ],
+    ) -> Optional[str]:
+        if isinstance(activity, di.Game):
+            return strip_illegal_chars(f"Playing {activity.name}")
+        elif isinstance(activity, di.Streaming):
+            text = f"Streaming at {activity.url}"
+            if name := activity.name:
+                text += f" - {name}"
+            if game := activity.game:
+                text += f" - {game}"
+        elif isinstance(activity, di.Spotify):
+            return strip_illegal_chars(
+                f"Listening to {activity.title} by {activity.artist} "
+                f"({activity.album}) - {activity.track_url}"
+            )
+        elif isinstance(activity, di.CustomActivity):
+            text = ""
+            if name := activity.name:
+                text += name
+            if e := activity.emoji:
+                text += f" <{e.url}>"
+            return strip_illegal_chars(text.lstrip()) or None
+        elif isinstance(activity, di.Activity):
+            text = ""
+            if name := activity.name:
+                text += name
+            if state := activity.state:
+                text += f" - {state}"
+            if e := activity.emoji:
+                text += f" <{e.url}>"
+            if url := activity.large_image_url:
+                text += f" - <{url}>"
+            if type_ := activity.type:
+                type_string = str(type_).removeprefix("ActivityType.")
+                if "unknown" not in type_string:
+                    text += f" - {type_string}"
+            return strip_illegal_chars(text.lstrip()) or None
+        return None
 
 
 class Attachment(LegacyAttachment):
