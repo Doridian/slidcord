@@ -73,7 +73,7 @@ class MessageMixin(ContentMessageMixin):
             reply_to.body = quoted_msg.clean_content
         author = quoted_msg.author
         if author == self.session.discord.user:
-            reply_to.author = self.session.user
+            reply_to.author = "user"
             return reply_to
 
         muc: "MUC" = getattr(self, "muc", None)  # type: ignore

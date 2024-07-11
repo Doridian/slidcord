@@ -49,6 +49,9 @@ class Gateway(BaseGateway):
 
     GROUPS = True
 
+    LEGACY_CONTACT_ID_TYPE = int
+    LEGACY_ROOM_ID_TYPE = int
+
     def __init__(self):
         super().__init__()
         if not config.DISCORD_VERBOSE:

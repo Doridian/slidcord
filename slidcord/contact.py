@@ -69,9 +69,6 @@ class Contact(StatusMixin, MessageMixin, LegacyContact[int]):  # type: ignore
 class Roster(LegacyRoster[int, Contact]):
     session: "Session"
 
-    def __init__(self, *a, **k):
-        super().__init__(*a, **k)
-
     async def by_discord_user(self, u: Union[di.User, di.Member]) -> Contact:
         return await self.by_legacy_id(u.id)
 
