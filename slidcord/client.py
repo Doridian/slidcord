@@ -28,8 +28,13 @@ async def captcha_handler(
 ) -> str:
     return await client.session.input(
         "You need to complete a captcha to be able to continue using "
-        f"discord. Maybe you'll find some useful info here: {captcha_required}."
-        f"If you do, you can reply here with the captcha token."
+        "discord. Maybe you'll find some useful info here:\n"
+        f"errors: {captcha_required.errors}\n"
+        f"service: {captcha_required.service}\n"
+        f"sitekey: {captcha_required.sitekey}\n"
+        f"rqdata: {captcha_required.rqdata}\n"
+        f"rqtoken: {captcha_required.rqtoken}\n"
+        "If you do, you can reply here with the captcha token."
     )
 
 
