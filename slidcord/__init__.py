@@ -51,6 +51,7 @@ class Gateway(BaseGateway):
 
     LEGACY_CONTACT_ID_TYPE = int
     LEGACY_ROOM_ID_TYPE = int
+    LEGACY_MSG_ID_TYPE = int
 
     def __init__(self):
         super().__init__()
